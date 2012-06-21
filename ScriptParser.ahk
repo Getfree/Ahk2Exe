@@ -1,4 +1,3 @@
-
 PreprocessScript(ByRef ScriptText, AhkScript, ExtraFiles, FileList="", FirstScriptDir="", Options="", iOption=0)
 {
 	SplitPath, AhkScript, ScriptName, ScriptDir
@@ -86,16 +85,21 @@ PreprocessScript(ByRef ScriptText, AhkScript, ExtraFiles, FileList="", FirstScri
 					if !AlreadyIncluded
 						FileList._Insert(IncludeFile)
 					PreprocessScript(ScriptText, IncludeFile, ExtraFiles, FileList, FirstScriptDir, Options, IgnoreErrors)
-				}
-			}else if !contSection && RegExMatch(tline, "i)^FileInstall[ \t]*[, \t][ \t]*([^,]+?)[ \t]*,", o) ; TODO: implement `, detection
-			{
+				}			
+			}else if !contSection && RegExMatch(tline, "i)^FileInstall[ \t]*[, \t][ \t]*([^,]+)[ \t]*(,[ \t]*([^,]+))?", o) ; TODO: implement `, detection
+			{			
 				if o1 ~= "[^``]%"
 					Util_Error("Error: Invalid ""FileInstall"" syntax found. ")
 				_ := Options.esc
 				StringReplace, o1, o1, %_%`%, `%, All
 				StringReplace, o1, o1, %_%`,, `,, All
 				StringReplace, o1, o1, %_%%_%,, %_%,, All
-				ExtraFiles._Insert(o1)
+				
+				; if second parameter of FileInstall start with an asterisk, it is interpreted as a resource-type/resource-name/lang-id trio
+				RegExMatch(o3, "^\*([^/]*)/?([^/]*)/?([^/]*)$", resId)
+
+				ExtraFiles._Insert({file: o1, resType: resId1, resName: resId2, resLang: resId3})
+
 				ScriptText .= tline "`n"
 			}else if !contSection && RegExMatch(tline, "i)^#CommentFlag\s+(.+)$", o)
 				Options.comm := o1, ScriptText .= tline "`n"
