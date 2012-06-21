@@ -96,9 +96,9 @@ PreprocessScript(ByRef ScriptText, AhkScript, ExtraFiles, FileList="", FirstScri
 				StringReplace, o1, o1, %_%%_%,, %_%,, All
 				
 				; if second parameter of FileInstall start with an asterisk, it is interpreted as a resource-type/resource-name/lang-id trio
-				RegExMatch(o3, "^\*([^/]*)/?([^/]*)/?([^/]*)$", resId)
+				RegExMatch(o3, "^(\*)([^/]*)/?([^/]*)/?([^/]*)$", resId)
 
-				ExtraFiles._Insert({file: o1, resType: resId1, resName: resId2, resLang: resId3})
+				ExtraFiles._Insert({file: o1, resType: resId2, resName: resId3, resLang: resId4, preProcess: !!resId1})
 
 				ScriptText .= tline "`n"
 			}else if !contSection && RegExMatch(tline, "i)^#CommentFlag\s+(.+)$", o)
