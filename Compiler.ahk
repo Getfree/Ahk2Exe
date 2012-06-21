@@ -88,7 +88,7 @@ BundleAhkScript(ExeFile, AhkFile, IcoFile="")
 		if(file ~= "i)\.ico$" and resType==14){ ; .ico files added to the icon-group section require special handling
 			ReplaceAhkIcon(module, file, ExeFile, resName, resLang)
 		}else{
-			if(file ~= "i)\.ahk$"){ ; if it's a AHK script then we preprocess it
+			if(file ~= "i)\.ahk$" and resFile.preProcess){ ; if it's a AHK script and pre-processing is enabled then we preprocess it
 				PreprocessScript(scriptCont, file, [])
 				VarSetCapacity(filedata, filesize := StrPut(scriptCont, "UTF-8"))
 				StrPut(scriptCont, &filedata, "UTF-8")
