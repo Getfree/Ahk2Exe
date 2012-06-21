@@ -46,4 +46,4 @@ The syntax for the second parameters is:
         - resource-type = 10 (RCData)
         - resource-id = the file name (FileInstall's first parameter)
         - resource-lang = 0x409 (english)
-- If there is no leading asterisk, the parameters is interpreted in its usual way
+- If there is no leading asterisk, the parameter is interpreted in its usual way
