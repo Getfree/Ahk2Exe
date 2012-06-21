@@ -40,7 +40,7 @@ The syntax for the second parameters is:
 - For standard resource types, like RCData, Icons, Icon groups, etc... the number Id has to be used
 - Expresions between [] can be ommited
 - If something is ommited, the defaults are:
-        - resource-type = 10
+        - resource-type = 10 (RCData)
         - resource-id = the file name (FileInstall's first parameter)
         - resource-lang = 0x409 (english)
 - If there is no leading asterisk, the parameters is interpreted in its usual way
