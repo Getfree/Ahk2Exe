@@ -14,8 +14,8 @@ Handle FileInstall on same-line If* commands.
 
 
 Custom additions by Getfree
---------------------------
-The functionality of the FileInstall command has been extended in two way:
+---------------------------
+The functionality of the FileInstall command has been extended in two ways:
 
 1. You can customize how resource files are added to the final exe by specifying its resource-type/resource-name/resource-language in the second parameter of FileInstall.
 
