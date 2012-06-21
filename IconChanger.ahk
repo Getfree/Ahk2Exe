@@ -1,11 +1,12 @@
 
 ; This code is based on Ahk2Exe's changeicon.cpp
 
-ReplaceAhkIcon(re, IcoFile, ExeFile)
+ReplaceAhkIcon(re, IcoFile, ExeFile, iconGroupID, langId=0x409)
 {
 	global _EI_HighestIconID
-	static iconID := 159
-	ids := EnumIcons(ExeFile, iconID)
+	;static iconGroupID := 159
+
+	ids := EnumIcons(ExeFile, iconGroupID)
 	if !IsObject(ids)
 		return false
 	
@@ -26,7 +27,7 @@ ReplaceAhkIcon(re, IcoFile, ExeFile)
 	
 	; Delete all the images
 	Loop, % ids._MaxIndex()
-		DllCall("UpdateResource", "ptr", re, "ptr", 3, "ptr", ids[A_Index], "ushort", 0x409, "ptr", 0, "uint", 0, "uint")
+		DllCall("UpdateResource", "ptr", re, "ptr", 3, "ptr", ids[A_Index], "ushort", langId, "ptr", 0, "uint", 0, "uint")
 	
 	Loop, %wCount%
 	{
@@ -45,16 +46,16 @@ ReplaceAhkIcon(re, IcoFile, ExeFile)
 		f.RawRead(iconData, iconDataSize)
 		f.Pos := oldPos
 		
-		DllCall("UpdateResource", "ptr", re, "ptr", 3, "ptr", thisID, "ushort", 0x409, "ptr", &iconData, "uint", iconDataSize, "uint")
+		DllCall("UpdateResource", "ptr", re, "ptr", 3, "ptr", thisID, "ushort", langId, "ptr", &iconData, "uint", iconDataSize, "uint")
 		
 		ige += 14
 	}
 	
-	DllCall("UpdateResource", "ptr", re, "ptr", 14, "ptr", iconID, "ushort", 0x409, "ptr", &rsrcIconGroup, "uint", rsrcIconGroupSize, "uint")
+	DllCall("UpdateResource", "ptr", re, "ptr", 14, isNum(iconGroupID)?"ptr":"str", iconGroupID, "ushort", langId, "ptr", &rsrcIconGroup, "uint", rsrcIconGroupSize, "uint")
 	return true
 }
 
-EnumIcons(ExeFile, iconID)
+EnumIcons(ExeFile, iconGroupID)
 {
 	; RT_GROUP_ICON = 14
 	; RT_ICON = 3
@@ -65,27 +66,34 @@ EnumIcons(ExeFile, iconID)
 	if !hModule
 		return
 	
-	_EI_HighestIconID := 0
-	if DllCall("EnumResourceNames", "ptr", hModule, "ptr", 3, "ptr", pEnumFunc, "uint", 0) = 0
-	{
-		DllCall("FreeLibrary", "ptr", hModule)
-		return
+	static gotHighestIdAlready = false
+	if(!gotHighestIdAlready){
+		_EI_HighestIconID := 0
+		if DllCall("EnumResourceNames", "ptr", hModule, "ptr", 3, "ptr", pEnumFunc, "uint", 0) = 0
+		{
+			DllCall("FreeLibrary", "ptr", hModule)
+			return
+		}
+		gotHighestIdAlready = true
 	}
-	
-	hRsrc := DllCall("FindResource", "ptr", hModule, "ptr", iconID, "ptr", 14, "ptr")
+
+	hRsrc := DllCall("FindResource", "ptr", hModule, isNum(iconGroupID)?"ptr":"str", iconGroupID, "ptr", 14, "ptr")
 	hMem := DllCall("LoadResource", "ptr", hModule, "ptr", hRsrc, "ptr")
 	pDirHeader := DllCall("LockResource", "ptr", hMem, "ptr")
-	pResDir := pDirHeader + 6
 	
-	wCount := NumGet(pDirHeader+4, "UShort")
 	iconIDs := []
+	if(pDirHeader){
+		pResDir := pDirHeader + 6
 	
-	Loop, %wCount%
-	{
-		pResDirEntry := pResDir + (A_Index-1)*14
-		iconIDs[A_Index] := NumGet(pResDirEntry+12, "UShort")
+		wCount := NumGet(pDirHeader+4, "UShort")
+	
+		Loop, %wCount%
+		{
+			pResDirEntry := pResDir + (A_Index-1)*14
+			iconIDs[A_Index] := NumGet(pResDirEntry+12, "UShort")
+		}
 	}
-	
+		
 	DllCall("FreeLibrary", "ptr", hModule)
 	return iconIDs
 }
